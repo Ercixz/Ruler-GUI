@@ -1,0 +1,33 @@
+appId: com.rulergui.app
+productName: Ruler GUI
+directories:
+  buildResources: build
+  output: dist
+files:
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!electron.vite.config.*"
+  - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
+  - "!docs/**/*"
+  - "!vitest.config.*"
+  - "!**/__tests__/**"
+  - "!bin/**"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  category: public.app-category.developer-tools
+  icon: build/icon.icns
+dmg:
+  artifactName: ${name}-${version}-${arch}.${ext}

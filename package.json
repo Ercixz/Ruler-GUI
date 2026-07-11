@@ -1,0 +1,58 @@
+{
+  "name": "ruler-gui",
+  "version": "1.0.0",
+  "description": "GUI frontend for Ruler — manage AI coding agent rules visually",
+  "bin": {
+    "ruler-gui": "bin/ruler-gui.js"
+  },
+  "main": "./out/main/index.js",
+  "author": "Ruler GUI Team",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "pack": "electron-builder --dir",
+    "dist": "electron-vite build && electron-builder",
+    "dist:win": "electron-vite build && electron-builder --win",
+    "dist:mac": "electron-vite build && electron-builder --mac",
+    "postinstall": "electron-builder install-app-deps",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.3",
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/lang-markdown": "^6.3.1",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/language-data": "^6.5.2",
+    "@codemirror/state": "^6.5.0",
+    "@codemirror/view": "^6.35.0",
+    "@electron-toolkit/utils": "^4.0.0",
+    "@intellectronica/ruler": "^0.3.44",
+    "chokidar": "^4.0.1",
+    "codemirror": "^6.0.1",
+    "electron-store": "^8.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "smol-toml": "^1.3.1",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^3.1.0",
+    "jsdom": "^28.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1",
+    "vitest": "^4.1.10"
+  }
+}

@@ -1,0 +1,60 @@
+import { app, BrowserWindow, nativeTheme, ipcMain, dialog } from 'electron'
+import { join } from 'path'
+import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { registerIpcHandlers, setMainWindow } from './ipc/handlers'
+
+function createWindow(): BrowserWindow {
+  const mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 960,
+    minHeight: 600,
+    frame: false,
+    titleBarStyle: 'hidden',
+    title: 'Ruler GUI',
+    backgroundColor: nativeTheme.shouldUseDarkColors ? '#0d1117' : '#f5f7fa',
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
+    }
+  })
+
+  mainWindow.on('ready-to-show', () => {
+    mainWindow.show()
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+  }
+
+  return mainWindow
+}
+
+app.whenReady().then(() => {
+  electronApp.setAppUserModelId('com.rulergui.app')
+
+  app.on('browser-window-created', (_, window) => {
+    optimizer.watchWindowShortcuts(window)
+  })
+
+  registerIpcHandlers()
+
+  const mainWindow = createWindow()
+  setMainWindow(mainWindow)
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    }
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
