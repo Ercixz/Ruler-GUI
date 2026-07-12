@@ -5,17 +5,70 @@ import { addToast } from '@/components/common/Toast'
 import type { Component } from '@/store/appStore'
 
 export function ProjectView(): React.ReactElement {
-  const { projects, activeProjectPath, components, assignComponent, unassignComponent, reorderComponents, setProjectAgents } = useAppStore()
+  const { projects, activeProjectPath, components, assignComponent, unassignComponent, reorderComponents, setProjectAgents, togglePinAgent, pinnedAgentIds, updateComponent } = useAppStore()
   const project = projects.find((p) => p.path === activeProjectPath)
+  const globalComps = components.filter((c) => c.globalPosition !== 'none')
+  const globalHead = globalComps.filter((c) => c.globalPosition === 'head')
+  const globalTail = globalComps.filter((c) => c.globalPosition === 'tail')
+  const [dragIdx, setDragIdx] = React.useState<number | null>(null)
+  const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
+  const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
+
+  const handleDropGlobal = (pos: 'head' | 'tail') => (e: React.DragEvent) => {
+    e.preventDefault()
+    const id = e.dataTransfer.getData('text/plain')
+    if (id) updateComponent(id, { globalPosition: pos })
+  }
 
   if (!project) {
-    return <div className="proj-empty-state"><p>Add a project folder to get started</p></div>
+    return (
+      <div className="proj-view">
+        <div className="proj-view-header">
+          <div>
+            <h1 className="proj-view-title">Global Rules</h1>
+            <div className="proj-view-path">Applied to all projects</div>
+          </div>
+        </div>
+        {(['head', 'tail'] as const).map((pos) => {
+          const items = pos === 'head' ? globalHead : globalTail
+          return (
+            <div key={pos} className="proj-section" onDrop={handleDropGlobal(pos)} onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' }}>
+              <div className="proj-section-header">
+                {pos === 'head' ? 'Before Project Rules' : 'After Project Rules'}
+                <span className="proj-section-count">({items.length})</span>
+              </div>
+              {items.length === 0 ? (
+                <div className="proj-drop-hint">Drop components here</div>
+              ) : (
+                <div className="proj-hseq">
+                  {items.map((c, i) => (
+                    <React.Fragment key={c.id}>
+                      {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
+                      <div className="proj-hseq-item">
+                        <span className="proj-hseq-num">{i + 1}</span>
+                        <span className="proj-hseq-name">{c.title}</span>
+                        <button className="proj-hseq-remove" onClick={() => updateComponent(c.id, { globalPosition: 'none' })}>{'\u2715'}</button>
+                      </div>
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   const seq = project.componentIds.map((id) => components.find((c) => c.id === id)).filter(Boolean) as Component[]
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
 
-  const getPreview = () => seq.length === 0 ? '# No components' : seq.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
+  const getPreview = () => {
+    const gHead = components.filter((c) => c.globalPosition === 'head')
+    const gTail = components.filter((c) => c.globalPosition === 'tail')
+    const all = [...gHead, ...seq, ...gTail]
+    return all.length === 0 ? '# No components' : all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
+  }
 
   const handleApply = async () => {
     const rd = `${project.path}/.ruler`; const ap = `${rd}/AGENTS.md`
@@ -30,10 +83,6 @@ export function ProjectView(): React.ReactElement {
     await window.rulerApi.ruler.apply(project.path, { agents: project.agents })
     addToast('success', `Applied to ${project.name}`)
   }
-
-  const [dragIdx, setDragIdx] = React.useState<number | null>(null)
-  const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
-  const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
 
   return (
     <div className="proj-view">
@@ -113,7 +162,31 @@ export function ProjectView(): React.ReactElement {
             <button className="proj-mini-btn" onClick={() => setProjectAgents(project.path, [])}>None</button>
           </div>
         </div>
-        <div className="proj-agent-cats">
+
+        {/* Pinned Agents */}
+        {pinnedAgentIds.length > 0 && (
+          <div className="proj-pinned-section">
+            <div className="proj-pinned-header">Pinned</div>
+            <div className="proj-pinned-grid">
+              {pinnedAgentIds.map((id) => {
+                const a = AGENTS.find((x) => x.id === id)
+                if (!a) return null
+                return (
+                  <label key={a.id} className={`proj-agent proj-agent-pinned ${project.agents.includes(a.id) ? 'proj-agent-on' : ''}`}>
+                    <input type="checkbox" checked={project.agents.includes(a.id)}
+                      onChange={() => setProjectAgents(project.path, project.agents.includes(a.id) ? project.agents.filter((x) => x !== a.id) : [...project.agents, a.id])} />
+                    <span className="proj-agent-name">{a.name}</span>
+                    <span className="proj-agent-path">{a.outputFile}</span>
+                    <button className="proj-agent-star proj-agent-star-on" onClick={(e) => { e.preventDefault(); togglePinAgent(a.id) }} title="Unpin">★</button>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Category Grid */}
+        <div className="proj-cat-grid">
           {CATEGORIES.map((cat) => (
             <div key={cat} className="proj-agent-cat">
               <div className="proj-agent-cat-header" onClick={() => toggleAgentCat(cat)}>
@@ -129,6 +202,9 @@ export function ProjectView(): React.ReactElement {
                         onChange={() => setProjectAgents(project.path, project.agents.includes(a.id) ? project.agents.filter((x) => x !== a.id) : [...project.agents, a.id])} />
                       <span className="proj-agent-name">{a.name}</span>
                       <span className="proj-agent-path">{a.outputFile}</span>
+                      <button className={`proj-agent-star ${pinnedAgentIds.includes(a.id) ? 'proj-agent-star-on' : ''}`} onClick={(e) => { e.preventDefault(); togglePinAgent(a.id) }} title={pinnedAgentIds.includes(a.id) ? 'Unpin' : 'Pin'}>
+                        {pinnedAgentIds.includes(a.id) ? '★' : '☆'}
+                      </button>
                     </label>
                   ))}
                 </div>

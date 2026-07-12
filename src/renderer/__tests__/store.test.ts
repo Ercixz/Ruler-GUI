@@ -28,7 +28,7 @@ describe('AppStore', () => {
 
   it('adds and removes components', () => {
     const store = useAppStore.getState()
-    store.addComponent({ id: 'c1', title: 'Test', content: '# Test', category: 'General' })
+    store.addComponent({ id: 'c1', title: 'Test', content: '# Test', category: 'General', globalPosition: 'none' })
 
     expect(useAppStore.getState().components).toHaveLength(1)
     expect(useAppStore.getState().components[0].title).toBe('Test')
@@ -40,7 +40,7 @@ describe('AppStore', () => {
   it('assigns components to projects', () => {
     useAppStore.getState().addProject('C:/test/project-b')
     const store = useAppStore.getState()
-    store.addComponent({ id: 'c2', title: 'Security', content: '# Security', category: 'Security' })
+    store.addComponent({ id: 'c2', title: 'Security', content: '# Security', category: 'Security', globalPosition: 'none' })
     store.assignComponent('C:/test/project-b', 'c2')
 
     const project = useAppStore.getState().projects.find((p) => p.path === 'C:/test/project-b')

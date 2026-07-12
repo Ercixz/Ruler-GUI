@@ -6,7 +6,7 @@ import { ToastContainer, Button } from './components/common'
 import type { Component } from './store/appStore'
 
 function App(): React.ReactElement {
-  const { theme, projects, activeProjectPath, addProject, removeProject, setActiveProject, t, poolCollapsed, components } = useAppStore()
+  const { theme, projects, activeProjectPath, addProject, removeProject, setActiveProject, t, poolCollapsed, components, pinnedAgentIds } = useAppStore()
   const [poolWidth, setPoolWidth] = useState(280)
   const [rightWidth, setRightWidth] = useState(280)
   const resizing = useRef<'left' | 'right' | null>(null)
@@ -34,17 +34,32 @@ function App(): React.ReactElement {
 
   useEffect(() => {
     const load = async () => {
-      const saved = (await window.rulerApi.store.get('projects')) as string[] | undefined
-      if (saved && saved.length > 0) {
-        for (const p of saved) addProject(p)
+      const store = useAppStore.getState()
+      let saved = (await window.rulerApi.store.get('projectStates')) as { path: string; componentIds: string[]; agents: string[] }[] | undefined
+      if (!saved || saved.length === 0) {
+        const old = (await window.rulerApi.store.get('projects')) as string[] | undefined
+        if (old && old.length > 0) saved = old.map((p) => ({ path: p, componentIds: [], agents: [] }))
       }
+      if (saved && saved.length > 0) {
+        for (const ps of saved) store.loadProjectState(ps)
+      }
+      const pins = (await window.rulerApi.store.get('pinnedAgentIds')) as string[] | undefined
+      if (pins && pins.length > 0) useAppStore.setState({ pinnedAgentIds: pins })
     }
     load()
   }, [])
 
   useEffect(() => {
-    window.rulerApi.store.set('projects', projects.map((p) => p.path))
+    window.rulerApi.store.set('projectStates', projects.map((p) => ({
+      path: p.path,
+      componentIds: p.componentIds,
+      agents: p.agents
+    })))
   }, [projects])
+
+  useEffect(() => {
+    window.rulerApi.store.set('pinnedAgentIds', pinnedAgentIds)
+  }, [pinnedAgentIds])
 
   useEffect(() => {
     const load = async () => {
@@ -59,6 +74,13 @@ function App(): React.ReactElement {
   useEffect(() => {
     window.rulerApi.components.save(components)
   }, [components])
+
+  useEffect(() => {
+    const unsub = window.rulerApi.components.onChanged((updated) => {
+      useAppStore.getState().setComponents(updated as Component[])
+    })
+    return unsub
+  }, [])
 
   const handleOpenFolder = async () => {
     const path = await window.rulerApi.folder.open()

@@ -25,9 +25,9 @@ export function TitleBar(): React.ReactElement {
           {themeIcons[theme]}
         </button>
         <div className="traffic-lights">
-          <button className="traffic-light tl-close" onClick={() => window.rulerApi.window.close()} />
-          <button className="traffic-light tl-minimize" onClick={() => window.rulerApi.window.minimize()} />
-          <button className="traffic-light tl-maximize" onClick={() => window.rulerApi.window.maximize()} />
+          <button className="traffic-light tl-minimize" onClick={() => window.rulerApi.window.minimize()} title="Minimize">{'\u2500'}</button>
+          <button className="traffic-light tl-maximize" onClick={() => window.rulerApi.window.maximize()} title="Maximize">{'\u25A1'}</button>
+          <button className="traffic-light tl-close" onClick={() => window.rulerApi.window.close()} title="Close">{'\u2715'}</button>
         </div>
       </div>
     </header>

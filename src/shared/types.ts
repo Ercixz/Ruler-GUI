@@ -48,7 +48,8 @@ export const IPC_EVENTS = {
   FILE_CHANGED: 'file:changed',
   RULER_STREAM_OUTPUT: 'ruler:streamOutput',
   RULER_STREAM_ERROR: 'ruler:streamError',
-  RULER_STREAM_DONE: 'ruler:streamDone'
+  RULER_STREAM_DONE: 'ruler:streamDone',
+  COMPONENTS_CHANGED: 'components:changed'
 } as const
 
 export interface FileInfo {

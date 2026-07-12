@@ -25,6 +25,9 @@ import {
 } from './ruler-cli'
 import { readToml, readTomlConfig, writeToml } from './toml'
 import Store from 'electron-store'
+import { watch } from 'chokidar'
+import { join, dirname } from 'path'
+import { readFileSync, existsSync } from 'fs'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -42,7 +45,28 @@ export function setMainWindow(win: BrowserWindow): void {
   mainWindow = win
 }
 
+function watchConfigFile(): void {
+  const configPath = join(app.getPath('userData'), 'config.json')
+  const watcher = watch(configPath, {
+    ignoreInitial: true,
+    persistent: true,
+    awaitWriteFinish: { stabilityThreshold: 300, pollInterval: 100 }
+  })
+  watcher.on('change', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      try {
+        const raw = readFileSync(configPath, 'utf-8')
+        const data = JSON.parse(raw)
+        const components = data.components ?? []
+        mainWindow.webContents.send(IPC_EVENTS.COMPONENTS_CHANGED, components)
+      } catch { /* ignore parse errors */ }
+    }
+  })
+}
+
 export function registerIpcHandlers(): void {
+  watchConfigFile()
+
   ipcMain.handle(IPC_CHANNELS.WINDOW_MINIMIZE, (event) => {
     BrowserWindow.fromWebContents(event.sender)?.minimize()
   })

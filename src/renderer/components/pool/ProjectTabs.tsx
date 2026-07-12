@@ -55,6 +55,11 @@ export function ProjectTabs(): React.ReactElement {
         />
       </div>
 
+      {/* Global */}
+      <div className={`proj-global-entry ${!activeProjectPath ? 'proj-global-entry-active' : ''}`} onClick={() => setActiveProject(null)}>
+        <span className="proj-global-name">Global Rules</span>
+      </div>
+
       {/* List */}
       <div className="proj-tabs-v-list">
         {filtered.map((p, i) => (

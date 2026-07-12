@@ -4,11 +4,14 @@ import zh from '@/i18n/zh'
 import en from '@/i18n/en'
 import type { Translations } from '@/i18n/zh'
 
+export type GlobalPosition = 'none' | 'head' | 'tail'
+
 export interface Component {
   id: string
   title: string
   content: string
   category: string
+  globalPosition: GlobalPosition
 }
 
 export interface ProjectState {
@@ -22,6 +25,7 @@ interface AppState {
   theme: ThemeMode; locale: LocaleCode; t: Translations
   components: Component[]; projects: ProjectState[]; activeProjectPath: string | null
   editingComponentId: string | null; previewingPath: string | null; poolCollapsed: boolean
+  pinnedAgentIds: string[]
 
   setTheme: (t: ThemeMode) => void; setLocale: (l: LocaleCode) => void
   addComponent: (c: Component) => void
@@ -35,6 +39,8 @@ interface AppState {
   unassignComponent: (projectPath: string, componentId: string) => void
   reorderComponents: (projectPath: string, componentIds: string[]) => void
   setProjectAgents: (projectPath: string, agents: string[]) => void
+  togglePinAgent: (agentId: string) => void
+  loadProjectState: (ps: { path: string; componentIds: string[]; agents: string[] }) => void
   setActiveProject: (path: string | null) => void
   setPreviewingPath: (path: string | null) => void
   togglePoolCollapsed: () => void
@@ -48,6 +54,7 @@ export const useAppStore = create<AppState>((set) => ({
   theme: 'system', locale: 'en', t: en,
   components: [], projects: [], activeProjectPath: null,
   editingComponentId: null, previewingPath: null, poolCollapsed: false,
+  pinnedAgentIds: [],
 
   setTheme: (theme) => set({ theme }),
   setLocale: (locale) => set({ locale, t: translations[locale] }),
@@ -94,6 +101,24 @@ export const useAppStore = create<AppState>((set) => ({
     set((s) => ({
       projects: s.projects.map((p) => (p.path === projectPath ? { ...p, agents } : p))
     })),
+  togglePinAgent: (agentId) =>
+    set((s) => ({
+      pinnedAgentIds: s.pinnedAgentIds.includes(agentId)
+        ? s.pinnedAgentIds.filter((id) => id !== agentId)
+        : [...s.pinnedAgentIds, agentId]
+    })),
+  loadProjectState: (ps) =>
+    set((s) => {
+      const name = ps.path.split(/[\\/]/).pop() || ps.path
+      if (s.projects.find((p) => p.path === ps.path)) {
+        return {
+          projects: s.projects.map((p) =>
+            p.path === ps.path ? { ...p, componentIds: ps.componentIds, agents: ps.agents } : p
+          )
+        }
+      }
+      return { projects: [...s.projects, { path: ps.path, name, componentIds: ps.componentIds, agents: ps.agents }], activeProjectPath: ps.path }
+    }),
   setActiveProject: (path) => set({ activeProjectPath: path, previewingPath: null }),
   setPreviewingPath: (path) => set({ previewingPath: path }),
   togglePoolCollapsed: () => set((s) => ({ poolCollapsed: !s.poolCollapsed }))

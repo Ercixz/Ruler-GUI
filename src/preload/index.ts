@@ -120,7 +120,13 @@ const rulerApi = {
     list: () => ipcRenderer.invoke(IPC_CHANNELS.COMPONENTS_LIST) as Promise<unknown[]>,
     create: (comp: unknown) => ipcRenderer.invoke(IPC_CHANNELS.COMPONENTS_CREATE, comp) as Promise<unknown>,
     delete: (id: string) => ipcRenderer.invoke(IPC_CHANNELS.COMPONENTS_DELETE, id) as Promise<void>,
-    save: (components: unknown[]) => ipcRenderer.invoke(IPC_CHANNELS.COMPONENTS_SAVE, components) as Promise<void>
+    save: (components: unknown[]) => ipcRenderer.invoke(IPC_CHANNELS.COMPONENTS_SAVE, components) as Promise<void>,
+
+    onChanged: (callback: (components: unknown[]) => void): (() => void) => {
+      const handler = (_: Electron.IpcRendererEvent, components: unknown[]) => callback(components)
+      ipcRenderer.on(IPC_EVENTS.COMPONENTS_CHANGED, handler)
+      return () => ipcRenderer.removeListener(IPC_EVENTS.COMPONENTS_CHANGED, handler)
+    }
   }
 }
 
