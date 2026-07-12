@@ -1,41 +1,17 @@
-import React, { useRef, useMemo, lazy, Suspense } from 'react'
+import React from 'react'
 import { useAppStore } from '@/store/appStore'
 import { AGENTS, AGENTS_BY_CATEGORY, CATEGORIES } from '@/constants/agents'
+import { addToast } from '@/components/common/Toast'
 import type { Component } from '@/store/appStore'
-
-const MarkdownPreview = lazy(() => import('./MarkdownPreview'))
 
 export function ProjectView(): React.ReactElement {
   const { projects, activeProjectPath, components, assignComponent, unassignComponent, reorderComponents, setProjectAgents, togglePinAgent, pinnedAgentIds, updateComponent } = useAppStore()
   const project = projects.find((p) => p.path === activeProjectPath)
   const globalHead = components.filter((c) => c.globalHead)
   const globalTail = components.filter((c) => c.globalTail)
-  const globalDragIdxRef = useRef<number | null>(null)
-  const globalDragPosRef = useRef<'head' | 'tail' | null>(null)
+  const [dragIdx, setDragIdx] = React.useState<number | null>(null)
   const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
   const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
-
-  const globalPreview = useMemo(() => {
-    const all = [...globalHead, ...globalTail]
-    return all.length > 0
-      ? all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
-      : ''
-  }, [globalHead, globalTail])
-
-  const reorderGlobal = (pos: 'head' | 'tail', fromIdx: number, toIdx: number) => {
-    const key = pos === 'head' ? 'globalHead' : 'globalTail'
-    const store = useAppStore.getState()
-    const globalItems = store.components.filter(c => c[key])
-    const reordered = [...globalItems]
-    const [moved] = reordered.splice(fromIdx, 1)
-    reordered.splice(toIdx, 0, moved)
-    const reorderedIds = reordered.map(c => c.id)
-    const newOrder = [
-      ...store.components.filter(c => !c[key]),
-      ...reorderedIds.map(id => store.components.find(c => c.id === id)!).filter(Boolean)
-    ]
-    useAppStore.setState({ components: newOrder })
-  }
 
   const handleDropGlobal = (pos: 'head' | 'tail') => (e: React.DragEvent) => {
     e.preventDefault()
@@ -45,7 +21,7 @@ export function ProjectView(): React.ReactElement {
 
   if (!project) {
     return (
-      <div className="proj-view" style={{ display: 'block', height: 'auto', minHeight: 'auto' }}>
+      <div className="proj-view">
         <div className="proj-view-header">
           <div>
             <h1 className="proj-view-title">Global Rules</h1>
@@ -67,20 +43,7 @@ export function ProjectView(): React.ReactElement {
                   {items.map((c, i) => (
                     <React.Fragment key={c.id}>
                       {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
-                      <div
-                        className="proj-hseq-item"
-                        draggable
-                        onDragStart={() => { globalDragIdxRef.current = i; globalDragPosRef.current = pos }}
-                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
-                        onDrop={() => {
-                          const from = globalDragIdxRef.current
-                          if (from !== null && from !== i && globalDragPosRef.current === pos) {
-                            reorderGlobal(pos, from, i)
-                          }
-                          globalDragIdxRef.current = null; globalDragPosRef.current = null
-                        }}
-                        onDragEnd={() => { globalDragIdxRef.current = null; globalDragPosRef.current = null }}
-                      >
+                      <div className="proj-hseq-item">
                         <span className="proj-hseq-num">{i + 1}</span>
                         <span className="proj-hseq-name">{c.title}</span>
                         <button className="proj-hseq-remove" onClick={() => updateComponent(c.id, pos === 'head' ? { globalHead: false } : { globalTail: false })}>{'\u2715'}</button>
@@ -92,26 +55,33 @@ export function ProjectView(): React.ReactElement {
             </div>
           )
         })}
-        <div className="proj-section">
-          <div className="proj-section-header">Preview · Combined Global Rules</div>
-          <div className="proj-preview" style={{ minHeight: 120 }}>
-            {globalPreview || '# No global rules defined'}
-          </div>
-        </div>
       </div>
     )
   }
 
   const seq = project.componentIds.map((id) => components.find((c) => c.id === id)).filter(Boolean) as Component[]
-  const dragIdxRef = useRef<number | null>(null)
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
 
-  const previewContent = useMemo(() => {
-    const all = [...globalHead, ...seq, ...globalTail]
-    return all.length > 0
-      ? all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
-      : ''
-  }, [globalHead, globalTail, seq])
+  const getPreview = () => {
+    const gHead = components.filter((c) => c.globalHead)
+    const gTail = components.filter((c) => c.globalTail)
+    const all = [...gHead, ...seq, ...gTail]
+    return all.length === 0 ? '# No components' : all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
+  }
+
+  const handleApply = async () => {
+    const rd = `${project.path}/.ruler`; const ap = `${rd}/AGENTS.md`
+    if (!(await window.rulerApi.file.exists(rd))) await window.rulerApi.ruler.init(project.path)
+    await window.rulerApi.file.write(ap, getPreview())
+    if (project.agents.length > 0) {
+      const tp = `${rd}/ruler.toml`; const r = await window.rulerApi.toml.read(tp)
+      const ac: Record<string, { enabled: boolean }> = {}
+      for (const a of project.agents) ac[a] = { enabled: true }
+      await window.rulerApi.toml.write(tp, { ...(r.data || {}), agents: ac })
+    }
+    await window.rulerApi.ruler.apply(project.path, { agents: project.agents })
+    addToast('success', `Applied to ${project.name}`)
+  }
 
   return (
     <div className="proj-view">
@@ -120,6 +90,7 @@ export function ProjectView(): React.ReactElement {
           <h1 className="proj-view-title">{project.name}</h1>
           <div className="proj-view-path">{project.path}</div>
         </div>
+        <button className="proj-btn" onClick={handleApply} disabled={seq.length === 0}>Apply Rules</button>
       </div>
 
       {/* Rule Sequence */}
@@ -136,21 +107,20 @@ export function ProjectView(): React.ReactElement {
               <React.Fragment key={c.id}>
                 {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
                 <div
-                  className="proj-hseq-item"
+                  className={`proj-hseq-item ${dragIdx === i ? 'proj-hseq-dragging' : ''}`}
                   draggable
-                  onDragStart={() => { dragIdxRef.current = i }}
+                  onDragStart={() => setDragIdx(i)}
                   onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
                   onDrop={() => {
-                    const from = dragIdxRef.current
-                    if (from !== null && from !== i) {
+                    if (dragIdx !== null && dragIdx !== i) {
                       const next = [...project.componentIds]
-                      const [moved] = next.splice(from, 1)
+                      const [moved] = next.splice(dragIdx, 1)
                       next.splice(i, 0, moved)
                       reorderComponents(project.path, next)
                     }
-                    dragIdxRef.current = null
+                    setDragIdx(null)
                   }}
-                  onDragEnd={() => { dragIdxRef.current = null }}
+                  onDragEnd={() => setDragIdx(null)}
                 >
                   <span className="proj-hseq-num">{i + 1}</span>
                   <span className="proj-hseq-name">{c.title}</span>
@@ -162,15 +132,22 @@ export function ProjectView(): React.ReactElement {
         )}
       </div>
 
-      {/* Live Preview */}
-      <div className="proj-cm-section" style={{ flex: 1, minHeight: 0 }}>
-        <div className="proj-cm-section-header">Preview · Generated AGENTS.md</div>
-        {previewContent ? (
-          <Suspense fallback={<div className="proj-preview" style={{ minHeight: 120 }}>{previewContent}</div>}>
-            <MarkdownPreview value={previewContent} />
-          </Suspense>
+      {/* Preview Snippet */}
+      <div className="proj-section">
+        <div className="proj-section-header">Preview</div>
+        {seq.length === 0 ? (
+          <div className="proj-preview-snippet proj-preview-empty">Add components to see a preview</div>
         ) : (
-          <div className="proj-preview-empty" style={{ flex: 1 }}>No components assigned to this project</div>
+          <div className="proj-preview-snippet">
+            {seq.slice(0, 3).map((c, i) => (
+              <div key={c.id} className="proj-preview-chunk">
+                <span className="proj-preview-chunk-num">{i + 1}</span>
+                <span className="proj-preview-chunk-title">{c.title}</span>
+                <span className="proj-preview-chunk-text">{c.content.replace(/\n/g, ' ').slice(0, 120)}</span>
+              </div>
+            ))}
+            {seq.length > 3 && <div className="proj-preview-more">+ {seq.length - 3} more components...</div>}
+          </div>
         )}
       </div>
 
