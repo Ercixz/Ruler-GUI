@@ -6,6 +6,7 @@ export function ComponentPool(): React.ReactElement {
   const [newTitle, setNewTitle] = React.useState('')
   const [newCategory, setNewCategory] = React.useState('')
   const [catOpen, setCatOpen] = React.useState<Set<string>>(new Set())
+  const [refsOpen, setRefsOpen] = React.useState<string | null>(null)
 
   const editing = components.find((c) => c.id === editingComponentId)
 
@@ -64,7 +65,10 @@ export function ComponentPool(): React.ReactElement {
           <div className="pool-editor-meta">
             <div className="pool-editor-meta-row">
               <span className="pool-editor-meta-label">Category</span>
-              <span className="pool-editor-meta-value">{editing.category}</span>
+              <input className="pool-editor-cat-input" value={editing.category} onChange={(e) => updateComponent(editing.id, { category: e.target.value.trim() || 'Uncategorized' })} />
+              <select className="pool-editor-cat-select" value={editing.category} onChange={(e) => updateComponent(editing.id, { category: e.target.value })} title="Change category">
+                {Array.from(grouped.keys()).sort().map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
             </div>
             <div className="pool-editor-meta-row">
               <span className="pool-editor-meta-label">Global</span>
@@ -96,10 +100,12 @@ export function ComponentPool(): React.ReactElement {
       <div className="pool-body">
         {Array.from(grouped.entries()).map(([cat, items]) => (
           <div key={cat} className="pool-group">
-            <div className="pool-group-header" onClick={() => toggleCat(cat)}>
+            <div className="pool-group-header" onClick={() => toggleCat(cat)}
+            >
               <span className="pool-group-arrow">{catOpen.has(cat) ? '\u25BC' : '\u25B6'}</span>
               <span className="pool-group-name">{cat}</span>
               <span className="pool-group-count">{items.length}</span>
+              <button className="pool-group-del" onClick={(e) => { e.stopPropagation(); for (const c of items) updateComponent(c.id, { category: 'Uncategorized' }) }} title="Move to Uncategorized">{'\u2715'}</button>
             </div>
             {catOpen.has(cat) && (
               <div className="pool-group-items">
@@ -113,7 +119,24 @@ export function ComponentPool(): React.ReactElement {
                   >
                     <div className="pool-card-title">{c.title}</div>
                     <div className="pool-card-preview">{c.content.slice(0, 80).replace(/\n/g, ' ')}</div>
-                    {(() => { const refs = projects.filter((p) => p.componentIds.includes(c.id)); if (refs.length > 0) return <span className="pool-card-refs">{refs.length} ref{refs.length > 1 ? 's' : ''}</span>; return null })()}
+                    {(() => {
+                      const refs = projects.filter((p) => p.componentIds.includes(c.id))
+                      if (refs.length === 0) return null
+                      return (
+                        <span className="pool-card-refs" onClick={(e) => { e.stopPropagation(); setRefsOpen(refsOpen === c.id ? null : c.id) }}>
+                          {refs.length} ref{refs.length > 1 ? 's' : ''}
+                          <span className="pool-card-refs-arrow">{refsOpen === c.id ? '\u25B4' : '\u25BE'}</span>
+                          {refsOpen === c.id && (
+                            <div className="pool-card-refs-menu" onClick={(e) => e.stopPropagation()}>
+                              {refs.map((p) => {
+                                const idx = p.componentIds.indexOf(c.id)
+                                return <div key={p.path} className="pool-card-refs-item">{p.name} <span className="pool-card-refs-pos">#{idx + 1}</span></div>
+                              })}
+                            </div>
+                          )}
+                        </span>
+                      )
+                    })()}
                     <button className={`pool-card-global ${(c.globalHead || c.globalTail) ? 'pool-card-global-on' : ''}`} onClick={(e) => { e.stopPropagation(); const next = (!c.globalHead && !c.globalTail) ? { globalHead: true, globalTail: false } : (c.globalHead && !c.globalTail) ? { globalHead: true, globalTail: true } : (c.globalHead && c.globalTail) ? { globalHead: false, globalTail: true } : { globalHead: false, globalTail: false }; updateComponent(c.id, next) }} title={`Global: ${!c.globalHead && !c.globalTail ? 'Off' : c.globalHead && c.globalTail ? 'Head + Tail' : c.globalHead ? 'Head' : 'Tail'}`}>
                       {c.globalHead && c.globalTail ? '\u2605\u21C5' : c.globalHead ? '\u2605\u2191' : c.globalTail ? '\u2605\u2193' : '\u2606'}
                     </button>

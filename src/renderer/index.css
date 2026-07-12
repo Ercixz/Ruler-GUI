@@ -98,6 +98,9 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 .pool-editor-meta-row { display: flex; align-items: flex-start; gap: 8px; padding: 2px 0; }
 .pool-editor-meta-label { color: var(--text-muted); min-width: 50px; flex-shrink: 0; }
 .pool-editor-meta-value { color: var(--text-primary); }
+.pool-editor-cat-input { flex: 1; min-width: 0; padding: 3px 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); font-size: 11px; outline: none; }
+.pool-editor-cat-input:focus { border-color: var(--accent); }
+.pool-editor-cat-select { flex: 0 0 80px; padding: 3px 4px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); font-size: 11px; outline: none; cursor: pointer; }
 .pool-editor-refs { flex-wrap: wrap; }
 .pool-editor-refs-list { display: flex; flex-wrap: wrap; gap: 4px; }
 .pool-editor-ref { padding: 1px 6px; background: var(--border); border-radius: var(--radius-sm); font-size: 10px; color: var(--text-muted); }
@@ -111,6 +114,9 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 .pool-group-arrow { font-size: 8px; color: var(--text-muted); width: 12px; }
 .pool-group-name { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; flex: 1; }
 .pool-group-count { font-size: 10px; color: var(--text-muted); background: var(--border); border-radius: 8px; padding: 1px 6px; }
+.pool-group-del { width: 18px; height: 18px; border: none; background: transparent; color: var(--text-muted); font-size: 9px; cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; opacity: 0; }
+.pool-group-header:hover .pool-group-del { opacity: 1; }
+.pool-group-del:hover { background: var(--danger); color: white; }
 
 .pool-group-items { padding: 2px 4px; }
 
@@ -123,7 +129,11 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 .pool-card-del { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-muted); font-size: 10px; cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; opacity: 0; }
 .pool-card:hover .pool-card-del { opacity: 1; }
 .pool-card-del:hover { background: var(--danger); color: white; }
-.pool-card-refs { position: absolute; bottom: 6px; left: 10px; font-size: 9px; color: var(--text-muted); background: var(--border); border-radius: 6px; padding: 1px 5px; }
+.pool-card-refs { position: absolute; bottom: 6px; left: 10px; font-size: 9px; color: var(--text-muted); background: var(--border); border-radius: 6px; padding: 1px 5px; cursor: pointer; }
+.pool-card-refs-arrow { margin-left: 3px; font-size: 8px; }
+.pool-card-refs-menu { position: absolute; bottom: 20px; left: 0; z-index: 20; min-width: 140px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 4px; }
+.pool-card-refs-item { padding: 3px 6px; font-size: 10px; color: var(--text-muted); white-space: nowrap; }
+.pool-card-refs-pos { color: var(--accent); font-weight: 600; margin-left: 4px; }
 .pool-card-global { position: absolute; bottom: 6px; right: 6px; width: 20px; height: 20px; border: none; background: transparent; color: var(--text-muted); font-size: 12px; cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; opacity: 0; }
 .pool-card:hover .pool-card-global { opacity: 1; }
 .pool-card-global-on { opacity: 1 !important; color: #e5b73b; }
@@ -139,11 +149,15 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 /* Vertical Project Tabs */
 .proj-tabs-vertical { background: var(--bg-pool); border-left: none; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
 .proj-tabs-v-header { padding: 12px 10px 4px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-.proj-global-entry { display: flex; align-items: center; gap: 6px; padding: 7px 10px; margin: 2px 6px; cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-primary); background: var(--bg-base); border: 1px solid var(--border); transition: all var(--transition); }
-.proj-global-entry:hover { background: var(--accent); color: white; border-color: var(--accent); }
-.proj-global-entry-active { background: var(--accent); color: white; border-color: var(--accent); }
-.proj-global-icon { font-size: 14px; width: 18px; text-align: center; }
-.proj-global-name { flex: 1; font-weight: 500; }
+.proj-tab-row { display: flex; align-items: center; gap: 6px; padding: 7px 10px; margin: 2px 6px; cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); background: transparent; transition: all var(--transition); }
+.proj-tab-row:hover { background: var(--border); color: var(--text-primary); }
+.proj-tab-row-active { background: var(--bg-base); color: var(--text-primary); border: 1px solid var(--border); }
+.proj-global-entry { background: var(--bg-base); border: 1px solid var(--border); color: var(--text-primary); }
+.proj-global-entry.proj-tab-row-active { background: var(--accent); color: white; border-color: var(--accent); }
+.proj-tab-row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-tab-row-close { width: 18px; height: 18px; border: none; background: transparent; color: var(--text-muted); font-size: 9px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--transition), background var(--transition); flex-shrink: 0; }
+.proj-tab-row:hover .proj-tab-row-close { opacity: 1; }
+.proj-tab-row-close:hover { background: var(--danger); color: white; }
 .proj-tabs-v-filter { padding: 4px 8px; }
 .proj-tabs-v-filter-input { width: 100%; padding: 4px 6px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-primary); font-size: 12px; outline: none; }
 .proj-tabs-v-filter-input:focus { border-color: var(--accent); }
