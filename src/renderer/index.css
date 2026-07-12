@@ -156,11 +156,11 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 /* Vertical Project Tabs */
 .proj-tabs-vertical { background: var(--bg-pool); border-left: none; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
 .proj-tabs-v-header { padding: 12px 10px 4px; font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; }
-.proj-tab-row { display: flex; align-items: center; gap: 6px; padding: 6px 10px; margin: 2px 6px; min-height: 34px; box-sizing: border-box; cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); background: var(--bg-surface); border: 1px solid transparent; transition: all var(--transition); }
+.proj-tab-row { display: flex; align-items: center; gap: 6px; padding: 6px 10px; margin: 2px 6px; min-height: 34px; box-sizing: border-box; cursor: pointer; border-radius: var(--radius-sm); font-size: 12px; color: var(--text-muted); background: transparent; border: 1px solid transparent; transition: all var(--transition); }
 .proj-tab-row:hover { background: var(--border); color: var(--text-primary); }
 .proj-tab-row-active { background: var(--accent); color: white; border-color: var(--accent); }
-.proj-global-entry { background: #111; border-color: #333; color: #ccc; }
-.proj-global-entry:hover { background: #111; color: #eee; }
+.proj-global-entry { background: var(--bg-base); border-color: var(--border); color: var(--text-primary); }
+.proj-global-entry:hover { background: var(--accent); color: white; }
 .proj-global-entry.proj-tab-row-active { background: var(--accent); color: white; border-color: var(--accent); }
 .proj-tab-row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .proj-tab-row-close { width: 20px; height: 20px; border: none; background: transparent; color: var(--text-muted); font-size: 10px; cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity var(--transition), background var(--transition); flex-shrink: 0; }
