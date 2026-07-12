@@ -1,6 +1,7 @@
-import React, { useRef } from 'react'
+import React, { useRef, useMemo } from 'react'
 import { useAppStore } from '@/store/appStore'
 import { AGENTS, AGENTS_BY_CATEGORY, CATEGORIES } from '@/constants/agents'
+import { MarkdownPreview } from './MarkdownPreview'
 import type { Component } from '@/store/appStore'
 
 export function ProjectView(): React.ReactElement {
@@ -12,6 +13,13 @@ export function ProjectView(): React.ReactElement {
   const globalDragPosRef = useRef<'head' | 'tail' | null>(null)
   const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
   const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
+
+  const globalPreview = useMemo(() => {
+    const all = [...globalHead, ...globalTail]
+    return all.length > 0
+      ? all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
+      : ''
+  }, [globalHead, globalTail])
 
   const reorderGlobal = (pos: 'head' | 'tail', fromIdx: number, toIdx: number) => {
     const key = pos === 'head' ? 'globalHead' : 'globalTail'
@@ -83,6 +91,10 @@ export function ProjectView(): React.ReactElement {
             </div>
           )
         })}
+        <div className="proj-cm-section" style={{ flex: 1, minHeight: 0, marginTop: 16 }}>
+          <div className="proj-cm-section-header">Preview · Combined Global Rules</div>
+          <MarkdownPreview value={globalPreview} />
+        </div>
       </div>
     )
   }
@@ -90,6 +102,13 @@ export function ProjectView(): React.ReactElement {
   const seq = project.componentIds.map((id) => components.find((c) => c.id === id)).filter(Boolean) as Component[]
   const dragIdxRef = useRef<number | null>(null)
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
+
+  const previewContent = useMemo(() => {
+    const all = [...globalHead, ...seq, ...globalTail]
+    return all.length > 0
+      ? all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
+      : ''
+  }, [globalHead, globalTail, seq])
 
   return (
     <div className="proj-view">
@@ -140,26 +159,14 @@ export function ProjectView(): React.ReactElement {
         )}
       </div>
 
-      {/* Preview Snippet */}
-      <div className="proj-section">
-        <div className="proj-section-header">Preview</div>
-        {(() => {
-          const allPreview = [...globalHead, ...seq, ...globalTail]
-          return allPreview.length === 0 ? (
-            <div className="proj-preview-snippet proj-preview-empty">Add components to see a preview</div>
-          ) : (
-            <div className="proj-preview-snippet">
-              {allPreview.slice(0, 4).map((c, i) => (
-                <div key={`${c.id}-${i}`} className="proj-preview-chunk">
-                  <span className="proj-preview-chunk-num">{i + 1}</span>
-                  <span className="proj-preview-chunk-title">{c.globalHead ? '\u2606Head' : c.globalTail ? '\u2606Tail' : c.title}</span>
-                  <span className="proj-preview-chunk-text">{c.content.replace(/\n/g, ' ').slice(0, 120)}</span>
-                </div>
-              ))}
-              {allPreview.length > 4 && <div className="proj-preview-more">+ {allPreview.length - 4} more components...</div>}
-            </div>
-          )
-        })()}
+      {/* Live Preview */}
+      <div className="proj-cm-section" style={{ flex: 1, minHeight: 0 }}>
+        <div className="proj-cm-section-header">Preview · Generated AGENTS.md</div>
+        {previewContent ? (
+          <MarkdownPreview value={previewContent} />
+        ) : (
+          <div className="proj-preview-empty" style={{ flex: 1 }}>No components assigned to this project</div>
+        )}
       </div>
 
       {/* Agents by Category */}
