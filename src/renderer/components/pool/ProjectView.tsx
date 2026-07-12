@@ -44,7 +44,7 @@ export function ProjectView(): React.ReactElement {
 
   if (!project) {
     return (
-      <div className="proj-view">
+      <div className="proj-view" style={{ display: 'block', height: 'auto', minHeight: 'auto' }}>
         <div className="proj-view-header">
           <div>
             <h1 className="proj-view-title">Global Rules</h1>
@@ -91,9 +91,11 @@ export function ProjectView(): React.ReactElement {
             </div>
           )
         })}
-        <div className="proj-cm-section" style={{ flex: 1, minHeight: 0, marginTop: 16 }}>
-          <div className="proj-cm-section-header">Preview · Combined Global Rules</div>
-          <MarkdownPreview value={globalPreview} />
+        <div className="proj-section">
+          <div className="proj-section-header">Preview · Combined Global Rules</div>
+          <div style={{ minHeight: 260, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)' }}>
+            <MarkdownPreview value={globalPreview} />
+          </div>
         </div>
       </div>
     )
