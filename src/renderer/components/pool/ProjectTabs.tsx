@@ -56,8 +56,11 @@ export function ProjectTabs(): React.ReactElement {
       </div>
 
       {/* Global */}
-      <div className={`proj-global-entry ${!activeProjectPath ? 'proj-global-entry-active' : ''}`} onClick={() => setActiveProject(null)}>
-        <span className="proj-global-name">Global Rules</span>
+      <div
+        className={`proj-tab-row proj-global-entry ${!activeProjectPath ? 'proj-tab-row-active' : ''}`}
+        onClick={() => setActiveProject(null)}
+      >
+        <span className="proj-tab-row-name">Global Rules</span>
       </div>
 
       {/* List */}
@@ -65,7 +68,7 @@ export function ProjectTabs(): React.ReactElement {
         {filtered.map((p, i) => (
           <div
             key={p.path}
-            className={`proj-tab-v ${p.path === activeProjectPath ? 'proj-tab-v-active' : ''} ${dragIdx === i ? 'proj-tab-v-dragging' : ''}`}
+            className={`proj-tab-row ${p.path === activeProjectPath ? 'proj-tab-row-active' : ''} ${dragIdx === i ? 'proj-tab-v-dragging' : ''}`}
             onClick={() => setActiveProject(p.path)}
             onContextMenu={(e) => handleRightClick(e, p.path)}
             draggable
@@ -75,9 +78,9 @@ export function ProjectTabs(): React.ReactElement {
             onDragEnd={() => setDragIdx(null)}
             title={p.path}
           >
-            <span className="proj-tab-v-name">{p.name}</span>
+            <span className="proj-tab-row-name">{p.name}</span>
             <button
-              className="proj-tab-v-close"
+              className="proj-tab-row-close"
               onClick={(e) => { e.stopPropagation(); removeProject(p.path) }}
             >
               {'\u2715'}
