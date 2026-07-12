@@ -9,8 +9,25 @@ export function ProjectView(): React.ReactElement {
   const globalHead = components.filter((c) => c.globalHead)
   const globalTail = components.filter((c) => c.globalTail)
   const [dragIdx, setDragIdx] = React.useState<number | null>(null)
+  const [globalDragIdx, setGlobalDragIdx] = React.useState<number | null>(null)
+  const [globalDragPos, setGlobalDragPos] = React.useState<'head' | 'tail' | null>(null)
   const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
   const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
+
+  const reorderGlobal = (pos: 'head' | 'tail', fromIdx: number, toIdx: number) => {
+    const key = pos === 'head' ? 'globalHead' : 'globalTail'
+    const store = useAppStore.getState()
+    const globalItems = store.components.filter(c => c[key])
+    const reordered = [...globalItems]
+    const [moved] = reordered.splice(fromIdx, 1)
+    reordered.splice(toIdx, 0, moved)
+    const reorderedIds = reordered.map(c => c.id)
+    const newOrder = [
+      ...store.components.filter(c => !c[key]),
+      ...reorderedIds.map(id => store.components.find(c => c.id === id)!).filter(Boolean)
+    ]
+    useAppStore.setState({ components: newOrder })
+  }
 
   const handleDropGlobal = (pos: 'head' | 'tail') => (e: React.DragEvent) => {
     e.preventDefault()
@@ -42,7 +59,19 @@ export function ProjectView(): React.ReactElement {
                   {items.map((c, i) => (
                     <React.Fragment key={c.id}>
                       {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
-                      <div className="proj-hseq-item">
+                      <div
+                        className={`proj-hseq-item ${globalDragIdx === i && globalDragPos === pos ? 'proj-hseq-dragging' : ''}`}
+                        draggable
+                        onDragStart={() => { setGlobalDragIdx(i); setGlobalDragPos(pos) }}
+                        onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
+                        onDrop={() => {
+                          if (globalDragIdx !== null && globalDragIdx !== i && globalDragPos === pos) {
+                            reorderGlobal(pos, globalDragIdx, i)
+                          }
+                          setGlobalDragIdx(null); setGlobalDragPos(null)
+                        }}
+                        onDragEnd={() => { setGlobalDragIdx(null); setGlobalDragPos(null) }}
+                      >
                         <span className="proj-hseq-num">{i + 1}</span>
                         <span className="proj-hseq-name">{c.title}</span>
                         <button className="proj-hseq-remove" onClick={() => updateComponent(c.id, pos === 'head' ? { globalHead: false } : { globalTail: false })}>{'\u2715'}</button>
@@ -112,20 +141,23 @@ export function ProjectView(): React.ReactElement {
       {/* Preview Snippet */}
       <div className="proj-section">
         <div className="proj-section-header">Preview</div>
-        {seq.length === 0 ? (
-          <div className="proj-preview-snippet proj-preview-empty">Add components to see a preview</div>
-        ) : (
-          <div className="proj-preview-snippet">
-            {seq.slice(0, 3).map((c, i) => (
-              <div key={c.id} className="proj-preview-chunk">
-                <span className="proj-preview-chunk-num">{i + 1}</span>
-                <span className="proj-preview-chunk-title">{c.title}</span>
-                <span className="proj-preview-chunk-text">{c.content.replace(/\n/g, ' ').slice(0, 120)}</span>
-              </div>
-            ))}
-            {seq.length > 3 && <div className="proj-preview-more">+ {seq.length - 3} more components...</div>}
-          </div>
-        )}
+        {(() => {
+          const allPreview = [...globalHead, ...seq, ...globalTail]
+          return allPreview.length === 0 ? (
+            <div className="proj-preview-snippet proj-preview-empty">Add components to see a preview</div>
+          ) : (
+            <div className="proj-preview-snippet">
+              {allPreview.slice(0, 4).map((c, i) => (
+                <div key={`${c.id}-${i}`} className="proj-preview-chunk">
+                  <span className="proj-preview-chunk-num">{i + 1}</span>
+                  <span className="proj-preview-chunk-title">{c.globalHead ? '\u2606Head' : c.globalTail ? '\u2606Tail' : c.title}</span>
+                  <span className="proj-preview-chunk-text">{c.content.replace(/\n/g, ' ').slice(0, 120)}</span>
+                </div>
+              ))}
+              {allPreview.length > 4 && <div className="proj-preview-more">+ {allPreview.length - 4} more components...</div>}
+            </div>
+          )
+        })()}
       </div>
 
       {/* Agents by Category */}
