@@ -1,7 +1,6 @@
 import React from 'react'
 import { useAppStore } from '@/store/appStore'
 import { AGENTS, AGENTS_BY_CATEGORY, CATEGORIES } from '@/constants/agents'
-import { addToast } from '@/components/common/Toast'
 import type { Component } from '@/store/appStore'
 
 export function ProjectView(): React.ReactElement {
@@ -62,27 +61,6 @@ export function ProjectView(): React.ReactElement {
   const seq = project.componentIds.map((id) => components.find((c) => c.id === id)).filter(Boolean) as Component[]
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
 
-  const getPreview = () => {
-    const gHead = components.filter((c) => c.globalHead)
-    const gTail = components.filter((c) => c.globalTail)
-    const all = [...gHead, ...seq, ...gTail]
-    return all.length === 0 ? '# No components' : all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
-  }
-
-  const handleApply = async () => {
-    const rd = `${project.path}/.ruler`; const ap = `${rd}/AGENTS.md`
-    if (!(await window.rulerApi.file.exists(rd))) await window.rulerApi.ruler.init(project.path)
-    await window.rulerApi.file.write(ap, getPreview())
-    if (project.agents.length > 0) {
-      const tp = `${rd}/ruler.toml`; const r = await window.rulerApi.toml.read(tp)
-      const ac: Record<string, { enabled: boolean }> = {}
-      for (const a of project.agents) ac[a] = { enabled: true }
-      await window.rulerApi.toml.write(tp, { ...(r.data || {}), agents: ac })
-    }
-    await window.rulerApi.ruler.apply(project.path, { agents: project.agents })
-    addToast('success', `Applied to ${project.name}`)
-  }
-
   return (
     <div className="proj-view">
       <div className="proj-view-header">
@@ -90,7 +68,6 @@ export function ProjectView(): React.ReactElement {
           <h1 className="proj-view-title">{project.name}</h1>
           <div className="proj-view-path">{project.path}</div>
         </div>
-        <button className="proj-btn" onClick={handleApply} disabled={seq.length === 0}>Apply Rules</button>
       </div>
 
       {/* Rule Sequence */}
