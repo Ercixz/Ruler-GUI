@@ -1,8 +1,9 @@
-import React, { useRef, useMemo } from 'react'
+import React, { useRef, useMemo, lazy, Suspense } from 'react'
 import { useAppStore } from '@/store/appStore'
 import { AGENTS, AGENTS_BY_CATEGORY, CATEGORIES } from '@/constants/agents'
-import { MarkdownPreview } from './MarkdownPreview'
 import type { Component } from '@/store/appStore'
+
+const MarkdownPreview = lazy(() => import('./MarkdownPreview'))
 
 export function ProjectView(): React.ReactElement {
   const { projects, activeProjectPath, components, assignComponent, unassignComponent, reorderComponents, setProjectAgents, togglePinAgent, pinnedAgentIds, updateComponent } = useAppStore()
@@ -165,7 +166,9 @@ export function ProjectView(): React.ReactElement {
       <div className="proj-cm-section" style={{ flex: 1, minHeight: 0 }}>
         <div className="proj-cm-section-header">Preview · Generated AGENTS.md</div>
         {previewContent ? (
-          <MarkdownPreview value={previewContent} />
+          <Suspense fallback={<div className="proj-preview" style={{ minHeight: 120 }}>{previewContent}</div>}>
+            <MarkdownPreview value={previewContent} />
+          </Suspense>
         ) : (
           <div className="proj-preview-empty" style={{ flex: 1 }}>No components assigned to this project</div>
         )}
