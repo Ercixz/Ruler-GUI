@@ -148,7 +148,7 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 .pool-empty { padding: 24px 16px; font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.8; }
 
 /* ========== Projects Area ========== */
-.projects-area { display: flex; flex-direction: column; overflow: hidden; flex: 1; background: var(--bg-pool); }
+.projects-area { display: flex; flex-direction: column; overflow: hidden; flex: 1; background: var(--bg-base); }
 .proj-content { flex: 1; overflow-y: auto; }
 
 .proj-empty-state { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 14px; }

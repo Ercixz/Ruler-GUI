@@ -93,8 +93,8 @@ export function ProjectView(): React.ReactElement {
         })}
         <div className="proj-section">
           <div className="proj-section-header">Preview · Combined Global Rules</div>
-          <div style={{ minHeight: 260, border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)' }}>
-            <MarkdownPreview value={globalPreview} />
+          <div className="proj-preview" style={{ minHeight: 120 }}>
+            {globalPreview || '# No global rules defined'}
           </div>
         </div>
       </div>
