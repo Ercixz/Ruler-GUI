@@ -9,6 +9,7 @@ function App(): React.ReactElement {
   const { theme, projects, activeProjectPath, addProject, removeProject, setActiveProject, t, poolCollapsed, components, pinnedAgentIds } = useAppStore()
   const [poolWidth, setPoolWidth] = useState(280)
   const [rightWidth, setRightWidth] = useState(280)
+  const loaded = useRef(false)
   const resizing = useRef<'left' | 'right' | null>(null)
   const startX = useRef(0)
   const startW = useRef(0)
@@ -73,12 +74,13 @@ function App(): React.ReactElement {
         })
         useAppStore.getState().setComponents(migrated)
       }
+      loaded.current = true
     }
     load()
   }, [])
 
   useEffect(() => {
-    window.rulerApi.components.save(components)
+    if (loaded.current) window.rulerApi.components.save(components)
   }, [components])
 
   useEffect(() => {
