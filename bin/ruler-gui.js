@@ -28,7 +28,7 @@ function create(title, content, category = 'General') {
   const s = readStore()
   const components = s.components || []
   const id = 'c-' + Date.now()
-  components.push({ id, title, content, category })
+  components.push({ id, title, content, category, globalHead: false, globalTail: false })
   s.components = components
   writeStore(s)
   console.log(JSON.stringify({ id, title, category }))

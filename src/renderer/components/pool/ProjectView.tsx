@@ -7,9 +7,8 @@ import type { Component } from '@/store/appStore'
 export function ProjectView(): React.ReactElement {
   const { projects, activeProjectPath, components, assignComponent, unassignComponent, reorderComponents, setProjectAgents, togglePinAgent, pinnedAgentIds, updateComponent } = useAppStore()
   const project = projects.find((p) => p.path === activeProjectPath)
-  const globalComps = components.filter((c) => c.globalPosition !== 'none')
-  const globalHead = globalComps.filter((c) => c.globalPosition === 'head')
-  const globalTail = globalComps.filter((c) => c.globalPosition === 'tail')
+  const globalHead = components.filter((c) => c.globalHead)
+  const globalTail = components.filter((c) => c.globalTail)
   const [dragIdx, setDragIdx] = React.useState<number | null>(null)
   const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
   const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
@@ -17,7 +16,7 @@ export function ProjectView(): React.ReactElement {
   const handleDropGlobal = (pos: 'head' | 'tail') => (e: React.DragEvent) => {
     e.preventDefault()
     const id = e.dataTransfer.getData('text/plain')
-    if (id) updateComponent(id, { globalPosition: pos })
+    if (id) updateComponent(id, pos === 'head' ? { globalHead: true } : { globalTail: true })
   }
 
   if (!project) {
@@ -47,7 +46,7 @@ export function ProjectView(): React.ReactElement {
                       <div className="proj-hseq-item">
                         <span className="proj-hseq-num">{i + 1}</span>
                         <span className="proj-hseq-name">{c.title}</span>
-                        <button className="proj-hseq-remove" onClick={() => updateComponent(c.id, { globalPosition: 'none' })}>{'\u2715'}</button>
+                        <button className="proj-hseq-remove" onClick={() => updateComponent(c.id, pos === 'head' ? { globalHead: false } : { globalTail: false })}>{'\u2715'}</button>
                       </div>
                     </React.Fragment>
                   ))}
@@ -64,8 +63,8 @@ export function ProjectView(): React.ReactElement {
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
 
   const getPreview = () => {
-    const gHead = components.filter((c) => c.globalPosition === 'head')
-    const gTail = components.filter((c) => c.globalPosition === 'tail')
+    const gHead = components.filter((c) => c.globalHead)
+    const gTail = components.filter((c) => c.globalTail)
     const all = [...gHead, ...seq, ...gTail]
     return all.length === 0 ? '# No components' : all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n')
   }

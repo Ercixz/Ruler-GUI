@@ -22,7 +22,7 @@ export function ComponentPool(): React.ReactElement {
   const handleAdd = () => {
     const title = newTitle.trim() || 'Untitled'
     const cat = newCategory.trim() || 'Uncategorized'
-    addComponent({ id: genId(), title, content: `## ${title}\n\n`, category: cat, globalPosition: 'none' })
+    addComponent({ id: genId(), title, content: `## ${title}\n\n`, category: cat, globalHead: false, globalTail: false })
     setNewTitle('')
     setNewCategory('')
     setCatOpen((prev) => new Set([...prev, cat]))
@@ -47,6 +47,10 @@ export function ComponentPool(): React.ReactElement {
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }} />
         <input className="pool-add-input" placeholder="Category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }} style={{ flex: '0 0 90px' }} />
+        <select className="pool-cat-select" value="" onChange={(e) => { if (e.target.value) setNewCategory(e.target.value) }} title="Select existing category">
+          <option value="" disabled>Category</option>
+          {Array.from(grouped.keys()).sort().map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
         <button className="pool-add-btn" onClick={handleAdd}>+</button>
       </div>
 
@@ -64,7 +68,7 @@ export function ComponentPool(): React.ReactElement {
             </div>
             <div className="pool-editor-meta-row">
               <span className="pool-editor-meta-label">Global</span>
-              <span className="pool-editor-meta-value">{editing.globalPosition === 'none' ? 'Off' : editing.globalPosition === 'head' ? 'Before all projects' : 'After all projects'}</span>
+              <span className="pool-editor-meta-value">{(editing.globalHead && editing.globalTail) ? 'Head + Tail' : editing.globalHead ? 'Head (before all)' : editing.globalTail ? 'Tail (after all)' : 'Off'}</span>
             </div>
             {(() => {
               const refs = projects.filter((p) => p.componentIds.includes(editing.id))
@@ -109,8 +113,9 @@ export function ComponentPool(): React.ReactElement {
                   >
                     <div className="pool-card-title">{c.title}</div>
                     <div className="pool-card-preview">{c.content.slice(0, 80).replace(/\n/g, ' ')}</div>
-                    <button className={`pool-card-global ${c.globalPosition !== 'none' ? 'pool-card-global-on' : ''}`} onClick={(e) => { e.stopPropagation(); const next = c.globalPosition === 'none' ? 'head' : c.globalPosition === 'head' ? 'tail' : 'none'; updateComponent(c.id, { globalPosition: next }) }} title={`Global: ${c.globalPosition === 'none' ? 'Off' : c.globalPosition}`}>
-                      {c.globalPosition === 'tail' ? '\u2726' : c.globalPosition === 'head' ? '\u2605' : '\u2606'}
+                    {(() => { const refs = projects.filter((p) => p.componentIds.includes(c.id)); if (refs.length > 0) return <span className="pool-card-refs">{refs.length} ref{refs.length > 1 ? 's' : ''}</span>; return null })()}
+                    <button className={`pool-card-global ${(c.globalHead || c.globalTail) ? 'pool-card-global-on' : ''}`} onClick={(e) => { e.stopPropagation(); const next = (!c.globalHead && !c.globalTail) ? { globalHead: true, globalTail: false } : (c.globalHead && !c.globalTail) ? { globalHead: true, globalTail: true } : (c.globalHead && c.globalTail) ? { globalHead: false, globalTail: true } : { globalHead: false, globalTail: false }; updateComponent(c.id, next) }} title={`Global: ${!c.globalHead && !c.globalTail ? 'Off' : c.globalHead && c.globalTail ? 'Head + Tail' : c.globalHead ? 'Head' : 'Tail'}`}>
+                      {c.globalHead && c.globalTail ? '\u2605\u21C5' : c.globalHead ? '\u2605\u2191' : c.globalTail ? '\u2605\u2193' : '\u2606'}
                     </button>
                     <button className="pool-card-del" onClick={(e) => { e.stopPropagation(); removeComponent(c.id) }}>{'\u2715'}</button>
                   </div>

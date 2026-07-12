@@ -4,14 +4,13 @@ import zh from '@/i18n/zh'
 import en from '@/i18n/en'
 import type { Translations } from '@/i18n/zh'
 
-export type GlobalPosition = 'none' | 'head' | 'tail'
-
 export interface Component {
   id: string
   title: string
   content: string
   category: string
-  globalPosition: GlobalPosition
+  globalHead: boolean
+  globalTail: boolean
 }
 
 export interface ProjectState {

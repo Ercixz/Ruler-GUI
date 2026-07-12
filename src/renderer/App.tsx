@@ -65,7 +65,13 @@ function App(): React.ReactElement {
     const load = async () => {
       const saved = (await window.rulerApi.components.list()) as Component[]
       if (saved && saved.length > 0) {
-        useAppStore.getState().setComponents(saved)
+        const migrated = saved.map((c) => {
+          const comp = c as Component & { globalPosition?: string }
+          const gh = 'globalHead' in comp ? comp.globalHead : (comp as { globalPosition?: string }).globalPosition === 'head'
+          const gt = 'globalTail' in comp ? comp.globalTail : (comp as { globalPosition?: string }).globalPosition === 'tail'
+          return { id: comp.id, title: comp.title, content: comp.content, category: comp.category, globalHead: gh || false, globalTail: gt || false }
+        })
+        useAppStore.getState().setComponents(migrated)
       }
     }
     load()
