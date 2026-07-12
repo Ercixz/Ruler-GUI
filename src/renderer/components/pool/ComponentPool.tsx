@@ -1,5 +1,7 @@
 import React from 'react'
 import { useAppStore, genId } from '@/store/appStore'
+import { addToast } from '@/components/common/Toast'
+import type { Component } from '@/store/appStore'
 
 export function ComponentPool(): React.ReactElement {
   const { components, addComponent, removeComponent, editingComponentId, setEditingComponent, updateComponent, projects } = useAppStore()
@@ -27,6 +29,38 @@ export function ComponentPool(): React.ReactElement {
     setNewTitle('')
     setNewCategory('')
     setCatOpen((prev) => new Set([...prev, cat]))
+  }
+
+  const handleApplyAll = async () => {
+    const store = useAppStore.getState()
+    const comps = store.components
+    for (const project of store.projects) {
+      const rd = `${project.path}/.ruler`; const ap = `${rd}/AGENTS.md`
+      if (!(await window.rulerApi.file.exists(rd))) await window.rulerApi.ruler.init(project.path)
+      const seq = project.componentIds.map((id) => comps.find((c) => c.id === id)).filter(Boolean) as Component[]
+      const gHead = comps.filter((c) => c.globalHead)
+      const gTail = comps.filter((c) => c.globalTail)
+      const all = [...gHead, ...seq, ...gTail]
+      const content = all.length > 0 ? all.map((c, i) => `<!-- ${i + 1}. ${c.title} -->\n\n${c.content}`).join('\n\n---\n\n') : '# No components'
+      await window.rulerApi.file.write(ap, content)
+      if (project.agents.length > 0) {
+        const tp = `${rd}/ruler.toml`; const r = await window.rulerApi.toml.read(tp)
+        const ac: Record<string, { enabled: boolean }> = {}
+        for (const a of project.agents) ac[a] = { enabled: true }
+        await window.rulerApi.toml.write(tp, { ...(r.data || {}), agents: ac })
+      }
+      await window.rulerApi.ruler.apply(project.path, { agents: project.agents })
+    }
+    addToast('success', `Applied to ${store.projects.length} project(s)`)
+  }
+
+  const handleRevertAll = async () => {
+    const store = useAppStore.getState()
+    const saved = await window.rulerApi.store.get('projectStates') as { path: string; componentIds: string[]; agents: string[] }[] | undefined
+    if (saved && saved.length > 0) {
+      for (const ps of saved) store.loadProjectState(ps)
+    }
+    addToast('info', 'Reverted all changes')
   }
 
   const toggleCat = (cat: string) => {
@@ -149,6 +183,13 @@ export function ComponentPool(): React.ReactElement {
         ))}
         {components.length === 0 && <div className="pool-empty">No components yet.<br/>Type a title and press Enter.</div>}
       </div>
+
+      {projects.length > 0 && (
+        <div className="pool-footer">
+          <button className="pool-footer-btn pool-footer-btn-revert" onClick={handleRevertAll}>Revert</button>
+          <button className="pool-footer-btn pool-footer-btn-apply" onClick={handleApplyAll}>Apply All</button>
+        </div>
+      )}
     </div>
   )
 }
