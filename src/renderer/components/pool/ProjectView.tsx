@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { useAppStore } from '@/store/appStore'
 import { AGENTS, AGENTS_BY_CATEGORY, CATEGORIES } from '@/constants/agents'
 import type { Component } from '@/store/appStore'
@@ -8,9 +8,8 @@ export function ProjectView(): React.ReactElement {
   const project = projects.find((p) => p.path === activeProjectPath)
   const globalHead = components.filter((c) => c.globalHead)
   const globalTail = components.filter((c) => c.globalTail)
-  const [dragIdx, setDragIdx] = React.useState<number | null>(null)
-  const [globalDragIdx, setGlobalDragIdx] = React.useState<number | null>(null)
-  const [globalDragPos, setGlobalDragPos] = React.useState<'head' | 'tail' | null>(null)
+  const globalDragIdxRef = useRef<number | null>(null)
+  const globalDragPosRef = useRef<'head' | 'tail' | null>(null)
   const [agentCatOpen, setAgentCatOpen] = React.useState<Set<string>>(new Set(CATEGORIES))
   const toggleAgentCat = (cat: string) => setAgentCatOpen((prev) => { const n = new Set(prev); if (n.has(cat)) n.delete(cat); else n.add(cat); return n })
 
@@ -60,17 +59,18 @@ export function ProjectView(): React.ReactElement {
                     <React.Fragment key={c.id}>
                       {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
                       <div
-                        className={`proj-hseq-item ${globalDragIdx === i && globalDragPos === pos ? 'proj-hseq-dragging' : ''}`}
+                        className="proj-hseq-item"
                         draggable
-                        onDragStart={() => { setGlobalDragIdx(i); setGlobalDragPos(pos) }}
+                        onDragStart={() => { globalDragIdxRef.current = i; globalDragPosRef.current = pos }}
                         onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
                         onDrop={() => {
-                          if (globalDragIdx !== null && globalDragIdx !== i && globalDragPos === pos) {
-                            reorderGlobal(pos, globalDragIdx, i)
+                          const from = globalDragIdxRef.current
+                          if (from !== null && from !== i && globalDragPosRef.current === pos) {
+                            reorderGlobal(pos, from, i)
                           }
-                          setGlobalDragIdx(null); setGlobalDragPos(null)
+                          globalDragIdxRef.current = null; globalDragPosRef.current = null
                         }}
-                        onDragEnd={() => { setGlobalDragIdx(null); setGlobalDragPos(null) }}
+                        onDragEnd={() => { globalDragIdxRef.current = null; globalDragPosRef.current = null }}
                       >
                         <span className="proj-hseq-num">{i + 1}</span>
                         <span className="proj-hseq-name">{c.title}</span>
@@ -88,6 +88,7 @@ export function ProjectView(): React.ReactElement {
   }
 
   const seq = project.componentIds.map((id) => components.find((c) => c.id === id)).filter(Boolean) as Component[]
+  const dragIdxRef = useRef<number | null>(null)
   const handleDrop = (e: React.DragEvent) => { e.preventDefault(); const id = e.dataTransfer.getData('text/plain'); if (id) assignComponent(project.path, id) }
 
   return (
@@ -113,20 +114,21 @@ export function ProjectView(): React.ReactElement {
               <React.Fragment key={c.id}>
                 {i > 0 && <span className="proj-hseq-arrow">{'\u2192'}</span>}
                 <div
-                  className={`proj-hseq-item ${dragIdx === i ? 'proj-hseq-dragging' : ''}`}
+                  className="proj-hseq-item"
                   draggable
-                  onDragStart={() => setDragIdx(i)}
+                  onDragStart={() => { dragIdxRef.current = i }}
                   onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }}
                   onDrop={() => {
-                    if (dragIdx !== null && dragIdx !== i) {
+                    const from = dragIdxRef.current
+                    if (from !== null && from !== i) {
                       const next = [...project.componentIds]
-                      const [moved] = next.splice(dragIdx, 1)
+                      const [moved] = next.splice(from, 1)
                       next.splice(i, 0, moved)
                       reorderComponents(project.path, next)
                     }
-                    setDragIdx(null)
+                    dragIdxRef.current = null
                   }}
-                  onDragEnd={() => setDragIdx(null)}
+                  onDragEnd={() => { dragIdxRef.current = null }}
                 >
                   <span className="proj-hseq-num">{i + 1}</span>
                   <span className="proj-hseq-name">{c.title}</span>
