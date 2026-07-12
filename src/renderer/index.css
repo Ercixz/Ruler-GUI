@@ -110,8 +110,8 @@ body { font-family: var(--font-sans); font-size: 13px; line-height: 1.5; color: 
 
 .pool-footer { padding: 8px 10px; border-top: 1px solid var(--border); display: flex; gap: 6px; }
 .pool-footer-btn { flex: 1; padding: 6px 0; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 11px; font-weight: 600; cursor: pointer; text-align: center; transition: all var(--transition); }
-.pool-footer-btn-apply { background: var(--accent); color: white; border-color: var(--accent); }
-.pool-footer-btn-apply:hover { background: var(--accent-hover); }
+.pool-footer-btn-apply { background: var(--text-primary); color: var(--bg-base); border-color: var(--text-primary); }
+.pool-footer-btn-apply:hover { opacity: 0.85; }
 .pool-footer-btn-revert { background: transparent; color: var(--text-muted); }
 .pool-footer-btn-revert:hover { background: var(--border); color: var(--text-primary); }
 
