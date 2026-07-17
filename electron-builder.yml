@@ -1,5 +1,5 @@
-appId: com.rulergui.app
-productName: Ruler GUI
+appId: com.rulesync.app
+productName: RuleSync
 directories:
   buildResources: build
   output: dist

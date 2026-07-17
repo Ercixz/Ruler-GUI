@@ -1,6 +1,6 @@
 const zh = {
   app: {
-    title: 'Ruler GUI',
+    title: 'RuleSync',
     subtitle: '可视化管理 AI 编程助手规则文件'
   },
   welcome: {

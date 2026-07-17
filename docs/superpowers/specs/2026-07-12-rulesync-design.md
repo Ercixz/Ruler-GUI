@@ -1,4 +1,4 @@
-# Ruler GUI — 设计文档
+# RuleSync — 设计文档
 **日期：** 2026-07-12  
 **状态：** 已批准，进入实施
 
@@ -8,7 +8,7 @@
 
 [Ruler](https://github.com/intellectronica/ruler) 是一个 Node.js CLI 工具，把 `.ruler/` 目录下的 Markdown 规则文件批量分发到 30+ 种 AI coding agent（Claude Code、Cursor、Gemini CLI 等）各自的原生格式。
 
-**Ruler GUI** 是它的图形化前端，目标：
+**RuleSync** 是它的图形化前端，目标：
 - 无需终端知识即可管理规则文件和 agent 配置
 - 内置 `@intellectronica/ruler` npm 包，用户**零安装依赖**
 - 支持 Windows 和 macOS
@@ -86,7 +86,7 @@
 ## 5. 目录结构
 
 ```
-Ruler-GUI/
+rulesync/
 ├── docs/superpowers/
 │   ├── specs/       # 设计文档
 │   └── plans/       # 实施计划
@@ -210,8 +210,8 @@ Ruler-GUI/
 ## 9. 打包配置
 
 ```yaml
-appId: com.rulergui.app
-productName: Ruler GUI
+appId: com.rulesync.app
+productName: RuleSync
 win:
   target: nsis
   arch: [x64]

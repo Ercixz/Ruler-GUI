@@ -1,4 +1,4 @@
-# Ruler GUI
+# RuleSync
 
 Visual GUI frontend for [Ruler](https://github.com/intellectronica/ruler), a tool that distributes Markdown rule files to 30+ AI coding agents in their native formats.
 

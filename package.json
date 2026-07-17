@@ -1,12 +1,12 @@
 {
-  "name": "ruler-gui",
+  "name": "rulesync",
   "version": "1.0.0",
   "description": "GUI frontend for Ruler — manage AI coding agent rules visually",
   "bin": {
-    "ruler-gui": "bin/ruler-gui.js"
+    "rulesync": "bin/rulesync.js"
   },
   "main": "./out/main/index.js",
-  "author": "Ruler GUI Team",
+  "author": "RuleSync Team",
   "license": "MIT",
   "scripts": {
     "dev": "electron-vite dev",

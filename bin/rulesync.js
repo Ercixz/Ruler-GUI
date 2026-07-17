@@ -5,8 +5,8 @@ const os = require('os')
 
 function getStorePath() {
   const dir = process.env.APPDATA
-    ? join(process.env.APPDATA, 'ruler-gui')
-    : join(os.homedir(), '.config', 'ruler-gui')
+    ? join(process.env.APPDATA, 'rulesync')
+    : join(os.homedir(), '.config', 'rulesync')
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
   return join(dir, 'config.json')
 }
@@ -50,7 +50,7 @@ const getFlag = (name) => {
 }
 
 if (sub !== 'components') {
-  console.log(`Usage: ruler-gui components <command>
+  console.log(`Usage: rulesync components <command>
 
   list
   create --title <title> --content <md> --category <cat>

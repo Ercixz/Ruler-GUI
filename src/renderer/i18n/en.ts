@@ -2,7 +2,7 @@ import type { Translations } from './zh'
 
 const en: Translations = {
   app: {
-    title: 'Ruler GUI',
+    title: 'RuleSync',
     subtitle: 'Manage AI coding agent rules visually'
   },
   welcome: {

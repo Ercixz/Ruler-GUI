@@ -11,7 +11,7 @@ function createWindow(): BrowserWindow {
     minHeight: 600,
     frame: false,
     titleBarStyle: 'hidden',
-    title: 'Ruler GUI',
+    title: 'RuleSync',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0d1117' : '#f5f7fa',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -35,7 +35,7 @@ function createWindow(): BrowserWindow {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId('com.rulergui.app')
+  electronApp.setAppUserModelId('com.rulesync.app')
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

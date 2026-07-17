@@ -11,10 +11,10 @@
 ## 数据流
 
 ```
-CLI (ruler-gui components)
+CLI (rulesync components)
   │ write
   ▼
-~/.ruler-gui/components.json
+~/.rulesync/components.json
   │ read
   ▼
 electron-store → IPC → Zustand Store → UI
@@ -24,5 +24,5 @@ electron-store → IPC → Zustand Store → UI
 
 1. 组件持久化到 electron-store（`components` key）
 2. IPC 频道的 component CRUD
-3. CLI 脚本 `bin/ruler-gui.cmd` 调用 IPC 或直接读写文件
+3. CLI 脚本 `bin/rulesync.cmd` 调用 IPC 或直接读写文件
 4. 组件变更自动同步到 GUI
