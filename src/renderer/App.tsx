@@ -2,11 +2,11 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { useAppStore } from './store/appStore'
 import { TitleBar } from './components/layout'
 import { ComponentPool, ProjectView, ProjectTabs } from './components/pool'
-import { ToastContainer, Button } from './components/common'
+import { ToastContainer } from './components/common'
 import type { Component } from './store/appStore'
 
 function App(): React.ReactElement {
-  const { theme, projects, activeProjectPath, addProject, removeProject, setActiveProject, t, poolCollapsed, components, pinnedAgentIds } = useAppStore()
+  const { theme, projects, poolCollapsed, components, pinnedAgentIds } = useAppStore()
   const [poolWidth, setPoolWidth] = useState(280)
   const [rightWidth, setRightWidth] = useState(280)
   const loaded = useRef(false)
@@ -90,27 +90,6 @@ function App(): React.ReactElement {
     return unsub
   }, [])
 
-  const handleOpenFolder = async () => {
-    const path = await window.rulerApi.folder.open()
-    if (path) addProject(path)
-  }
-
-  if (projects.length === 0) {
-    return (
-      <div className="app" data-theme={theme === 'system' ? undefined : theme}>
-        <TitleBar />
-        <main className="main-content">
-          <div className="welcome">
-            <h1>{t.app.title}</h1>
-            <p>{t.app.subtitle}</p>
-            <Button size="lg" onClick={handleOpenFolder}>{t.welcome.openFolder}</Button>
-          </div>
-        </main>
-        <ToastContainer />
-      </div>
-    )
-  }
-
   return (
     <div className="app" data-theme={theme === 'system' ? undefined : theme}>
       <TitleBar />
@@ -139,4 +118,3 @@ function App(): React.ReactElement {
 }
 
 export default App
-
