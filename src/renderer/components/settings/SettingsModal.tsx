@@ -34,7 +34,7 @@ function statusLabel(status: UpdateStatus): string {
     case 'unsupported':
       return 'Updates are only available in packaged builds.'
     case 'error':
-      return status.error ?? 'Update check failed.'
+      return 'Update failed.'
     default:
       return 'Ready to check for updates.'
   }
@@ -74,7 +74,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps): React.Reac
   const canInstall = status?.state === 'downloaded'
 
   return (
-    <Modal open={open} title="Settings" onClose={onClose} width={520}>
+    <Modal open={open} title="Settings" onClose={onClose} width={680}>
       <div className="settings-panel">
         <aside className="settings-nav">
           <button className="settings-nav-item settings-nav-item-active">Updates</button>
@@ -110,7 +110,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps): React.Reac
               </div>
             )}
 
-            {status?.error && <div className="update-error">{status.error}</div>}
+            {status?.error && <div className="update-error" title={status.error}>{status.error}</div>}
 
             <div className="update-actions">
               <button className="proj-mini-btn update-action" disabled={busy || !canCheck} onClick={() => run(() => window.rulerApi.updates.check())}>

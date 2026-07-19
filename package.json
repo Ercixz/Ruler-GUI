@@ -1,6 +1,6 @@
 {
   "name": "rulesync",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "GUI frontend for Ruler — manage AI coding agent rules visually",
   "repository": {
     "type": "git",
