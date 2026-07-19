@@ -40,6 +40,11 @@ export const IPC_CHANNELS = {
 
   SHELL_OPEN_PATH: 'shell:openPath',
 
+  UPDATES_GET_STATUS: 'updates:getStatus',
+  UPDATES_CHECK: 'updates:check',
+  UPDATES_DOWNLOAD: 'updates:download',
+  UPDATES_INSTALL: 'updates:install',
+
   THEME_GET: 'theme:get',
   LOCALE_GET: 'locale:get'
 } as const
@@ -49,7 +54,8 @@ export const IPC_EVENTS = {
   RULER_STREAM_OUTPUT: 'ruler:streamOutput',
   RULER_STREAM_ERROR: 'ruler:streamError',
   RULER_STREAM_DONE: 'ruler:streamDone',
-  COMPONENTS_CHANGED: 'components:changed'
+  COMPONENTS_CHANGED: 'components:changed',
+  UPDATES_STATUS: 'updates:status'
 } as const
 
 export interface FileInfo {
@@ -142,4 +148,30 @@ export interface RulePiece {
   content: string
   source: 'global' | 'project'
   enabled: boolean
+}
+
+export type UpdateState =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'not-available'
+  | 'downloading'
+  | 'downloaded'
+  | 'error'
+  | 'unsupported'
+
+export interface UpdateStatus {
+  state: UpdateState
+  currentVersion: string
+  latestVersion?: string
+  releaseName?: string
+  releaseDate?: string
+  downloadedFile?: string
+  progress?: {
+    percent: number
+    transferred: number
+    total: number
+    bytesPerSecond: number
+  }
+  error?: string
 }

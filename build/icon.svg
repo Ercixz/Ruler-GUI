@@ -1,0 +1,42 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="128" y1="80" x2="896" y2="944" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#202428"/>
+      <stop offset="1" stop-color="#050607"/>
+    </linearGradient>
+    <linearGradient id="trackA" x1="224" y1="318" x2="800" y2="706" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f3f6f8"/>
+      <stop offset="0.5" stop-color="#b6c9d8"/>
+      <stop offset="1" stop-color="#65d4e9"/>
+    </linearGradient>
+    <linearGradient id="trackB" x1="800" y1="318" x2="224" y2="706" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d6f1f7"/>
+      <stop offset="0.52" stop-color="#a7bac8"/>
+      <stop offset="1" stop-color="#c8d0d6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+
+  <path
+    d="M 154 284 H 412 C 508 284 586 362 586 458 V 550 C 586 646 664 724 760 724 H 870"
+    fill="none"
+    stroke="url(#trackA)"
+    stroke-width="82"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M 870 284 H 612 C 516 284 438 362 438 458 V 550 C 438 646 360 724 264 724 H 154"
+    fill="none"
+    stroke="url(#trackB)"
+    stroke-width="82"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.86"
+  />
+
+  <circle cx="512" cy="504" r="128" fill="#e7f1f7"/>
+  <circle cx="512" cy="504" r="94" fill="#07090a"/>
+  <circle cx="512" cy="504" r="50" fill="#67d1e8"/>
+</svg>

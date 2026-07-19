@@ -2,6 +2,7 @@ import { app, BrowserWindow, nativeTheme, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcHandlers, setMainWindow } from './ipc/handlers'
+import { configureUpdates } from './ipc/updates'
 
 function createWindow(): BrowserWindow {
   const mainWindow = new BrowserWindow({
@@ -9,8 +10,8 @@ function createWindow(): BrowserWindow {
     height: 800,
     minWidth: 960,
     minHeight: 600,
-    frame: false,
-    titleBarStyle: 'hidden',
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    trafficLightPosition: process.platform === 'darwin' ? { x: 16, y: 16 } : undefined,
     title: 'RuleSync',
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0d1117' : '#f5f7fa',
     webPreferences: {
@@ -45,6 +46,7 @@ app.whenReady().then(() => {
 
   const mainWindow = createWindow()
   setMainWindow(mainWindow)
+  configureUpdates(mainWindow)
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

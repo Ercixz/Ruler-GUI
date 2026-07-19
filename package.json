@@ -1,7 +1,11 @@
 {
   "name": "rulesync",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "GUI frontend for Ruler — manage AI coding agent rules visually",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ercixz/rulesync.git"
+  },
   "bin": {
     "rulesync": "bin/rulesync.js"
   },
@@ -34,6 +38,7 @@
     "chokidar": "^4.0.1",
     "codemirror": "^6.0.1",
     "electron-store": "^8.2.0",
+    "electron-updater": "^6.8.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "smol-toml": "^1.3.1",

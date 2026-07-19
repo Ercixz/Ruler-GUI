@@ -1,7 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { useAppStore } from '@/store/appStore'
 
-export function ProjectTabs(): React.ReactElement {
+interface ProjectTabsProps {
+  onOpenSettings: () => void
+}
+
+export function ProjectTabs({ onOpenSettings }: ProjectTabsProps): React.ReactElement {
   const { projects, activeProjectPath, addProject, removeProject, setActiveProject } = useAppStore()
   const [filter, setFilter] = useState('')
   const [pathInput, setPathInput] = useState('')
@@ -43,7 +47,10 @@ export function ProjectTabs(): React.ReactElement {
 
   return (
     <div className="proj-tabs-vertical">
-      <div className="proj-tabs-v-header">Projects</div>
+      <div className="proj-tabs-v-header">
+        <span>Projects</span>
+        <button className="proj-settings-btn" onClick={onOpenSettings} title="Settings">⚙</button>
+      </div>
 
       {/* Filter */}
       <div className="proj-tabs-v-filter">

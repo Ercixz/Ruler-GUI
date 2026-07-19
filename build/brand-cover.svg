@@ -1,0 +1,47 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="coverBg" x1="150" y1="80" x2="1450" y2="830" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#202226"/>
+      <stop offset="1" stop-color="#070809"/>
+    </linearGradient>
+    <linearGradient id="card" x1="452" y1="164" x2="1164" y2="752" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f3237"/>
+      <stop offset="1" stop-color="#131518"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="562" y1="244" x2="1044" y2="598" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f4f4f5"/>
+      <stop offset="0.5" stop-color="#9fb5c8"/>
+      <stop offset="1" stop-color="#65d4f0"/>
+    </linearGradient>
+    <filter id="softShadow" x="284" y="64" width="1032" height="760" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="30" stdDeviation="45" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="900" rx="0" fill="url(#coverBg)"/>
+  <g filter="url(#softShadow)">
+    <rect x="360" y="128" width="880" height="644" rx="56" fill="url(#card)" stroke="#3b3f44" stroke-width="2"/>
+  </g>
+
+  <rect x="410" y="182" width="780" height="64" rx="18" fill="#0b0c0e" stroke="#303338" stroke-width="2"/>
+  <circle cx="452" cy="214" r="8" fill="#62676d"/>
+  <circle cx="482" cy="214" r="8" fill="#62676d"/>
+  <circle cx="512" cy="214" r="8" fill="#62676d"/>
+
+  <rect x="440" y="300" width="240" height="52" rx="14" fill="#0c0d0f" stroke="#34383d" stroke-width="2"/>
+  <rect x="440" y="380" width="240" height="52" rx="14" fill="#1d2023" stroke="#34383d" stroke-width="2"/>
+  <rect x="440" y="460" width="240" height="52" rx="14" fill="#1d2023" stroke="#34383d" stroke-width="2"/>
+
+  <path d="M760 330H846C890.183 330 926 365.817 926 410V490C926 534.183 961.817 570 1006 570H1080" stroke="url(#accent)" stroke-width="32" stroke-linecap="round"/>
+  <path d="M1080 330H994C949.817 330 914 365.817 914 410V490C914 534.183 878.183 570 834 570H760" stroke="url(#accent)" stroke-width="32" stroke-linecap="round" opacity="0.78"/>
+  <circle cx="920" cy="450" r="62" fill="#0c0d0f" stroke="#d9e1e8" stroke-width="10"/>
+  <circle cx="920" cy="450" r="26" fill="#75d8f0"/>
+
+  <rect x="1110" y="306" width="70" height="32" rx="16" fill="#d8eef5"/>
+  <rect x="1110" y="386" width="70" height="32" rx="16" fill="#9fb5c8"/>
+  <rect x="1110" y="466" width="70" height="32" rx="16" fill="#75d8f0"/>
+  <rect x="1110" y="546" width="70" height="32" rx="16" fill="#c9ced2"/>
+
+  <text x="440" y="650" fill="#f2f2f3" font-family="Arial" font-size="74" font-weight="700" letter-spacing="-1">RuleSync</text>
+  <text x="445" y="708" fill="#8c9299" font-family="Arial" font-size="26" font-weight="500">Centralize rules. Sync them everywhere.</text>
+</svg>

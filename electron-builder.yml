@@ -1,5 +1,9 @@
 appId: com.rulesync.app
 productName: RuleSync
+publish:
+  provider: github
+  owner: Ercixz
+  repo: rulesync
 directories:
   buildResources: build
   output: dist
@@ -17,13 +21,17 @@ win:
     - target: nsis
       arch:
         - x64
-  icon: build/icon.png
+  icon: build/icon.ico
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
 mac:
   target:
     - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
       arch:
         - x64
         - arm64

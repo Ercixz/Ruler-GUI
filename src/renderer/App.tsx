@@ -1,14 +1,15 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { useAppStore } from './store/appStore'
-import { TitleBar } from './components/layout'
 import { ComponentPool, ProjectView, ProjectTabs } from './components/pool'
+import { SettingsModal } from './components/settings'
 import { ToastContainer } from './components/common'
 import type { Component } from './store/appStore'
 
 function App(): React.ReactElement {
-  const { theme, projects, poolCollapsed, components, pinnedAgentIds } = useAppStore()
+  const { theme, projects, components, pinnedAgentIds } = useAppStore()
   const [poolWidth, setPoolWidth] = useState(280)
   const [rightWidth, setRightWidth] = useState(280)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const loaded = useRef(false)
   const resizing = useRef<'left' | 'right' | null>(null)
   const startX = useRef(0)
@@ -92,14 +93,11 @@ function App(): React.ReactElement {
 
   return (
     <div className="app" data-theme={theme === 'system' ? undefined : theme}>
-      <TitleBar />
       <main className="main-content">
         <div className="workspace">
-          {!poolCollapsed && (
-            <div className="pool-container" style={{ width: poolWidth }}>
-              <ComponentPool />
-            </div>
-          )}
+          <div className="pool-container" style={{ width: poolWidth }}>
+            <ComponentPool />
+          </div>
           <div className="splitter" onMouseDown={onMouseDown('left')} />
           <div className="projects-area">
             <div className="proj-content">
@@ -108,10 +106,11 @@ function App(): React.ReactElement {
           </div>
           <div className="splitter" onMouseDown={onMouseDown('right')} />
           <div style={{ width: rightWidth, flexShrink: 0, overflow: 'hidden' }}>
-            <ProjectTabs />
+            <ProjectTabs onOpenSettings={() => setSettingsOpen(true)} />
           </div>
         </div>
       </main>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <ToastContainer />
     </div>
   )

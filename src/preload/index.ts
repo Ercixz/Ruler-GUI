@@ -7,7 +7,8 @@ import type {
   RulerStreamChunk,
   RulerDiffEntry,
   TomlReadResult,
-  ProjectInfo
+  ProjectInfo,
+  UpdateStatus
 } from '../shared/types'
 
 const rulerApi = {
@@ -114,6 +115,21 @@ const rulerApi = {
 
   shell: {
     openPath: (dirPath: string) => ipcRenderer.invoke(IPC_CHANNELS.SHELL_OPEN_PATH, dirPath)
+  },
+
+  updates: {
+    getStatus: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.UPDATES_GET_STATUS) as Promise<UpdateStatus>,
+    check: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.UPDATES_CHECK) as Promise<UpdateStatus>,
+    download: () =>
+      ipcRenderer.invoke(IPC_CHANNELS.UPDATES_DOWNLOAD) as Promise<UpdateStatus>,
+    install: () => ipcRenderer.invoke(IPC_CHANNELS.UPDATES_INSTALL) as Promise<void>,
+    onStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+      const handler = (_: Electron.IpcRendererEvent, status: UpdateStatus) => callback(status)
+      ipcRenderer.on(IPC_EVENTS.UPDATES_STATUS, handler)
+      return () => ipcRenderer.removeListener(IPC_EVENTS.UPDATES_STATUS, handler)
+    }
   },
 
   components: {

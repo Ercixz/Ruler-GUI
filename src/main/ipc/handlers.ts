@@ -28,6 +28,7 @@ import Store from 'electron-store'
 import { watch } from 'chokidar'
 import { join, dirname } from 'path'
 import { readFileSync, existsSync } from 'fs'
+import { checkForUpdates, downloadUpdate, getUpdateStatus, installUpdate } from './updates'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -235,5 +236,21 @@ export function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.SHELL_OPEN_PATH, async (_, dirPath: string) => {
     shell.openPath(dirPath)
+  })
+
+  ipcMain.handle(IPC_CHANNELS.UPDATES_GET_STATUS, () => {
+    return getUpdateStatus()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.UPDATES_CHECK, async () => {
+    return checkForUpdates()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.UPDATES_DOWNLOAD, async () => {
+    return downloadUpdate()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.UPDATES_INSTALL, () => {
+    installUpdate()
   })
 }
